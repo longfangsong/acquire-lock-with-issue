@@ -2,7 +2,7 @@ name: 'Acquire Lock With Issue'
 description: 'Block other actions running by write something to an issue'
 inputs:
   token:
-    description: 'Your GitHub token, eg. ${{ secrets.GITHUB_TOKEN }}'
+    description: 'Your GitHub token'
     required: true
   issueId:
     description: 'Which issue is used as the lock'
@@ -18,5 +18,5 @@ inputs:
     default: "false"
 runs:
   using: 'node12'
-  main: 'dist/index.ts'
+  main: 'dist/index.js'
   post: 'dist/unlock.js'

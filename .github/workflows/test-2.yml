@@ -1,0 +1,15 @@
+name: Test lock1
+
+on:
+  issues
+
+jobs:
+  lock_and_hold_for_a_while:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acquire Lock With Issue
+        uses: longfangsong/acquire-lock-with-issue@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sleep for a miniute
+        run: sleep 60

@@ -23,32 +23,37 @@ async function currentLockHolder(octokit: InstanceType<typeof GitHub>, issueId: 
 }
 
 (async function () {
-    const token = core.getInput('token');
-    const octokit = github.getOctokit(token);
-    const issueId = parseInt(core.getInput('issueId'));
-    const thisRunId = github.context.runId;
-    while (true) {
-        let currentHolder = await currentLockHolder(octokit, issueId);
-        if (currentHolder === null) {
-            console.log(`Seems no body is holding the lock, try to acquire it...`);
-            octokit.issues.update({
-                ...github.context.repo,
-                issue_number: issueId,
-                body: thisRunId.toString()
-            });
-        } else if (currentHolder === thisRunId) {
-            console.log("Seems I got the lock successfully, waiting for any possible concurrent running locker...");
-            await sleep(10000);
-            let currentHolderAfterWait = await currentLockHolder(octokit, issueId);
-            if (currentHolderAfterWait === thisRunId) {
-                console.log("I still have the lock! Acquire success!");
-                break;
+    const forceUnlockOnly = core.getInput("forceUnlockOnly") == "true";
+    if (forceUnlockOnly) {
+        console.log("Unlock only job, skip locking.");
+    } else {
+        const token = core.getInput('token');
+        const octokit = github.getOctokit(token);
+        const issueId = parseInt(core.getInput('issueId'));
+        const thisRunId = github.context.runId;
+        while (true) {
+            let currentHolder = await currentLockHolder(octokit, issueId);
+            if (currentHolder === null) {
+                console.log(`Seems no body is holding the lock, try to acquire it...`);
+                octokit.issues.update({
+                    ...github.context.repo,
+                    issue_number: issueId,
+                    body: thisRunId.toString()
+                });
+            } else if (currentHolder === thisRunId) {
+                console.log("Seems I got the lock successfully, waiting for any possible concurrent running locker...");
+                await sleep(10000);
+                let currentHolderAfterWait = await currentLockHolder(octokit, issueId);
+                if (currentHolderAfterWait === thisRunId) {
+                    console.log("I still have the lock! Acquire success!");
+                    break;
+                } else {
+                    console.log("I lost the lock TAT, I'll retry ...");
+                }
             } else {
-                console.log("I lost the lock TAT, I'll retry ...");
+                console.log(`Blocked by ${currentHolder}, wait and retry ...`);
+                await sleep(10000 + Math.random() * 10000);
             }
-        } else {
-            console.log(`Blocked by ${currentHolder}, wait and retry ...`);
-            await sleep(10000 + Math.random() * 10000);
         }
     }
 })();
