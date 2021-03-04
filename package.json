@@ -1,0 +1,16 @@
+{
+  "name": "acquire-lock-with-issue",
+  "version": "1.0.0",
+  "description": "Block other actions running by write something to an issue",
+  "main": "src/index.ts",
+  "author": "longfangsong",
+  "license": "Unlicense",
+  "private": false,
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.2"
+  }
+}
